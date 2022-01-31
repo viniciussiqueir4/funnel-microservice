@@ -1,0 +1,81 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Funnel {
+  id                    String @id @default(uuid())
+  estableshimentId      Int
+  name                  String
+  botToken              String
+  totalSubmissions      Int?
+  isActive              Boolean? @default(true)
+  behavior              Behavior 
+  departmentToRedirect  Int?
+  posts                 FunnelLead[] 
+  messages              LeadMessage[]
+  funnelHasLeads        FunnelHasLead[]
+  funnelMessages        FunnelMessage[] 
+  deleted               Boolean?  @default(false)
+  deletedAt             DateTime? 
+  createdAt             DateTime? @default(now())
+  updatedAt             DateTime? @updatedAt 
+  updateByUserId        Int?
+}
+
+model FunnelLead {
+  id                    String @id @default(uuid())
+  leadId                String
+  funnel                Funnel       @relation(fields: [funnelId], references: [id])
+  funnelId              String
+  estableshimentId      Int
+  currentContact        String
+  currentMessage        Int
+  endOfFunnel           Boolean
+  funnelHasLeads        FunnelHasLead[]
+}
+
+model LeadMessage {
+  id                    String @id @default(uuid())
+  leadId                String
+  funnel                Funnel       @relation(fields: [funnelId], references: [id])
+  funnelId              String
+  estableshimentId      Int
+  message               String
+  sendedAt              DateTime?
+  error                 Boolean?
+}
+
+model FunnelMessage {
+  id                    String @id @default(uuid())
+  funnel                Funnel @relation(fields: [funnelId], references: [id])
+  funnelId              String
+  message               String
+  minutesAfterPrevious  Int
+  totalSubmissions      Int? @default(0)
+  filenames             String[]
+  messageButtons        String[]
+}
+
+model FunnelHasLead {
+  id                    String @id @default(uuid())
+  botToken              String
+  funnel                Funnel @relation(fields: [funnelId], references: [id])
+  funnelId              String
+  funnelLead            FunnelLead @relation(fields: [funnelLeadId], references: [id])
+  funnelLeadId          String
+  pushId                String
+}
+
+
+enum Behavior {
+  FINISH
+  REDIRECT
+}

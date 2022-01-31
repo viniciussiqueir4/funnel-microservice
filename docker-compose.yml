@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  db:
+    image: postgres
+    container_name: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: "admin"
+      POSTGRES_USER: "admin"
+      POSTGRES_DB: "funnel-db"
+    ports:
+      - "5432:5432"
+  redis:
+    image: redis
+    container_name: redis-funnel
+    restart: always
+    ports:
+      - "6379:6379"
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: microservice-funnel 
+    command: npm run dev
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/home/app
+    depends_on:
+      - db
+      - redis
+
